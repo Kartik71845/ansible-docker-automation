@@ -1,0 +1,36 @@
+---
+- name: Build Docker image and run a container
+  hosts: servers
+  become: yes
+
+  tasks:
+    - name: Update packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Build Docker image from Dockerfile
+      docker_image:
+        name: mywebapp
+        build:
+          path: .
+        source: build
+
+    - name: Run the Docker container
+      docker_container:
+        name: webapp
+        image: mywebapp
+        state: started
+        ports:
+          - "80:80"
